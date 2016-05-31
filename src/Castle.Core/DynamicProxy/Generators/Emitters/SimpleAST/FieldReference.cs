@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 {
-	using System.Diagnostics;
-	using System.Reflection;
-	using System.Reflection.Emit;
+    using System.Diagnostics;
+    using System.Reflection;
+    using System.Reflection.Emit;
+    using SaveTrees.Logging;
 
-	[DebuggerDisplay("{fieldbuilder.Name} ({fieldbuilder.FieldType})")]
+    [DebuggerDisplay("{fieldbuilder.Name} ({fieldbuilder.FieldType})")]
 	public class FieldReference : Reference
 	{
 		private readonly FieldInfo field;
@@ -82,14 +85,26 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 
 		public override void StoreReference(ILGenerator gen)
 		{
-			if (isStatic)
-			{
-				gen.Emit(OpCodes.Stsfld, Reference);
-			}
-			else
-			{
-				gen.Emit(OpCodes.Stfld, Reference);
-			}
+		    Log.CurrentLogger.Debug()("StoreReference ({@gen})", gen);
+            Log.CurrentLogger.Debug()("Reference ({@Reference})", Reference);
+            Log.CurrentLogger.Debug()("Reference ({Reference.Name})", Reference.Name);
+
+            try
+		    {
+		        if (isStatic)
+		        {
+		            gen.Emit(OpCodes.Stsfld, Reference);
+		        }
+		        else
+		        {
+		            gen.Emit(OpCodes.Stfld, Reference);
+		        }
+		    }
+		    catch (Exception exception)
+		    {
+		        Log.CurrentLogger.ErrorWithException()(exception, "FieldReference");
+                throw;
+		    }
 		}
-	}
+    }
 }
