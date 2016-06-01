@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//using SaveTrees.Logging;
+
 namespace Castle.DynamicProxy.Generators
 {
 	using System;
@@ -290,35 +292,34 @@ namespace Castle.DynamicProxy.Generators
 
 		private void ImplementChangeInvocationTarget(AbstractTypeEmitter invocation, FieldReference targetField)
 		{
-			var changeInvocationTarget = invocation.CreateMethod("ChangeInvocationTarget", typeof(void), new[] { typeof(object) });
-			changeInvocationTarget.CodeBuilder.AddStatement(
-				new AssignStatement(targetField,
-				                    new ConvertExpression(targetType, changeInvocationTarget.Arguments[0].ToExpression())));
+            var changeInvocationTarget = invocation.CreateMethod("ChangeInvocationTarget", typeof(void), new[] { typeof(object) });
+			changeInvocationTarget.CodeBuilder.AddStatement(new AssignStatement(targetField, new ConvertExpression(targetType, changeInvocationTarget.Arguments[0].ToExpression())));
 			changeInvocationTarget.CodeBuilder.AddStatement(new ReturnStatement());
 		}
 
 		private void ImplementChangeProxyTarget(AbstractTypeEmitter invocation, ClassEmitter @class)
 		{
-			var changeInvocationTarget = invocation.CreateMethod("ChangeProxyTarget", typeof(void), new[] { typeof(object) });
-			changeInvocationTarget.CodeBuilder.AddStatement(
-				new ExpressionStatement(
-					new ConvertExpression(@class.TypeBuilder, new FieldReference(InvocationMethods.ProxyObject).ToExpression())));
+//            Log.CurrentLogger.Debug()("ImplementChangeProxyTarget2");
+
+            var changeInvocationTarget = invocation.CreateMethod("ChangeProxyTarget", typeof(void), new[] { typeof(object) });
+			changeInvocationTarget.CodeBuilder.AddStatement(new ExpressionStatement(new ConvertExpression(@class.TypeBuilder, new FieldReference(InvocationMethods.ProxyObject).ToExpression())));
 
 			var field = @class.GetField("__target");
-			changeInvocationTarget.CodeBuilder.AddStatement(
-				new AssignStatement(
-					new FieldReference(field.Reference) { OwnerReference = null },
-					new ConvertExpression(field.Fieldbuilder.FieldType, changeInvocationTarget.Arguments[0].ToExpression())));
-
-			changeInvocationTarget.CodeBuilder.AddStatement(new ReturnStatement());
+            var fieldReference = new FieldReference(field.Reference) { OwnerReference = null };
+		    var argumentsExpression = changeInvocationTarget.Arguments[0].ToExpression();
+		    var convertExpression = new ConvertExpression(field.Fieldbuilder.FieldType, argumentsExpression);
+		    var assignStatement = new AssignStatement(fieldReference, convertExpression);
+		    changeInvocationTarget.CodeBuilder.AddStatement(assignStatement);
+            changeInvocationTarget.CodeBuilder.AddStatement(new ReturnStatement());
 		}
 
 		private void ImplementChangeProxyTargetInterface(ClassEmitter @class, AbstractTypeEmitter invocation,
 		                                                 FieldReference targetField)
 		{
-			ImplementChangeInvocationTarget(invocation, targetField);
+            ImplementChangeInvocationTarget(invocation, targetField);
 
-			ImplementChangeProxyTarget(invocation, @class);
-		}
-	}
+ //           Log.CurrentLogger.Debug()("targetField: {@targetField}", targetField);
+            ImplementChangeProxyTarget(invocation, @class);
+        }
+    }
 }

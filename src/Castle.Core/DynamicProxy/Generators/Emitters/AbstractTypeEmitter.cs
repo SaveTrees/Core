@@ -25,7 +25,10 @@ namespace Castle.DynamicProxy.Generators.Emitters
 
 	public abstract class AbstractTypeEmitter
 	{
-		private const MethodAttributes defaultAttributes =
+        private static readonly object Lock = new Object();
+        public int methodIndex = 0;
+
+        private const MethodAttributes defaultAttributes =
 			MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.Public;
 
 		private readonly ConstructorCollection constructors;
@@ -276,8 +279,18 @@ namespace Castle.DynamicProxy.Generators.Emitters
 			}
 
 			FieldReference value;
-			fields.TryGetValue(name, out value);
-			return value;
+			var succeeds = fields.TryGetValue(name, out value);
+		    if (name == "__target")
+		    {
+		        foreach (var field in fields)
+		        {
+                    //Log.CurrentLogger.Debug()("Key: {@Key}", field.Key);
+                    //Log.CurrentLogger.Debug()("Value: {@Value}", field.Value);
+                }
+                //Log.CurrentLogger.Debug()("succeeds: {@succeeds}", succeeds);
+		        //Log.CurrentLogger.Debug()("value: {@value}", value);
+		    }
+		    return value;
 		}
 
 		public Type GetGenericArgument(String genericArgumentName)
@@ -361,29 +374,41 @@ namespace Castle.DynamicProxy.Generators.Emitters
 		{
 			if (!typebuilder.GetTypeInfo().IsInterface && constructors.Count == 0)
 			{
-				CreateDefaultConstructor();
+                CreateDefaultConstructor();
+            }
+
+		    foreach (IMemberEmitter builder in properties)
+		    {
+		        builder.EnsureValidCodeBlock();
+		        builder.Generate();
+		    }
+
+            foreach (IMemberEmitter builder in events)
+			{
+				builder.EnsureValidCodeBlock();
+				builder.Generate();
 			}
 
-			foreach (IMemberEmitter builder in properties)
+            foreach (IMemberEmitter builder in constructors)
 			{
 				builder.EnsureValidCodeBlock();
 				builder.Generate();
 			}
-			foreach (IMemberEmitter builder in events)
-			{
-				builder.EnsureValidCodeBlock();
-				builder.Generate();
-			}
-			foreach (IMemberEmitter builder in constructors)
-			{
-				builder.EnsureValidCodeBlock();
-				builder.Generate();
-			}
-			foreach (IMemberEmitter builder in methods)
-			{
-				builder.EnsureValidCodeBlock();
-				builder.Generate();
-			}
+
+		    foreach (IMemberEmitter builder in methods)
+		    {
+		        methodIndex++;
+		        lock (Lock)
+		        {
+		            builder.EnsureValidCodeBlock();
+		            //Log.CurrentLogger.Debug()("-------------------------START:  EnsureBuildersAreInAValidState: methods------------------------------");
+		            //Log.CurrentLogger.Debug()("methodIndex: {methodIndex}", methodIndex);
+		            //Log.CurrentLogger.Debug()("Member: {Member}", builder.Member);
+		            //Log.CurrentLogger.Debug()("ReturnType: {ReturnType}", builder.ReturnType);
+                    builder.Generate();
+		            //Log.CurrentLogger.Debug()("-------------------------FINISH: EnsureBuildersAreInAValidState: methods------------------------------");
+		        }
+		    }
 		}
 	}
 }

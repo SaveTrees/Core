@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//using SaveTrees.Logging;
+
 namespace Castle.DynamicProxy.Generators.Emitters.CodeBuilders
 {
 	using System;
@@ -70,17 +72,22 @@ namespace Castle.DynamicProxy.Generators.Emitters.CodeBuilders
 			isEmpty = false;
 		}
 
-		internal void Generate(IMemberEmitter member, ILGenerator il)
-		{
-			foreach (var local in ilmarkers)
-			{
-				local.Generate(il);
-			}
+	    internal void Generate(IMemberEmitter member, ILGenerator il)
+	    {
+	        //Log.CurrentLogger.Debug()("START : ilmarkers");
+	        foreach (var local in ilmarkers)
+	        {
+	            local.Generate(il);
+	        }
 
-			foreach (var stmt in stmts)
-			{
-				stmt.Emit(member, il);
-			}
-		}
+            //Log.CurrentLogger.Debug()("START : stmts2");
+            foreach (var stmt in stmts)
+	        {
+	            //Log.CurrentLogger.Debug()("Statement: {@stmt}", stmt.ToString());
+	            stmt.Emit(member, il);
+                //Log.CurrentLogger.Debug()("Emitted statement: {@stmt}", stmt.ToString());
+            }
+	        //Log.CurrentLogger.Debug()("FINISH: stmts2");
+	    }
 	}
 }

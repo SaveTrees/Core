@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//using SaveTrees.Logging;
+
 namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 {
 	using System.Reflection.Emit;
@@ -29,9 +31,31 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 
 		public override void Emit(IMemberEmitter member, ILGenerator gen)
 		{
-			ArgumentsUtil.EmitLoadOwnerAndReference(target.OwnerReference, gen);
-			expression.Emit(member, gen);
-			target.StoreReference(gen);
-		}
-	}
+            //Log.CurrentLogger.Debug()("-START : Emit Assign");
+            //Log.CurrentLogger.Debug()("-- {@Member}", member.Member);
+            //Log.CurrentLogger.Debug()("-- {@ReturnType}", member.ReturnType);
+
+            //Log.CurrentLogger.Debug()("--START : EmitLoadOwnerAndReference");
+            ArgumentsUtil.EmitLoadOwnerAndReference(target.OwnerReference, gen);
+            //Log.CurrentLogger.Debug()("--FINISH: EmitLoadOwnerAndReference");
+
+            //Log.CurrentLogger.Debug()("--START : Emit");
+            expression.Emit(member, gen);
+            //Log.CurrentLogger.Debug()("--FINISH: Emit");
+
+            //Log.CurrentLogger.Debug()("--START : StoreReference");
+
+		    if (member.Member.Name == "ChangeProxyTarget")
+		    {
+                //Log.CurrentLogger.Debug()("target: {Type}", target.GetType().Name);
+                //Log.CurrentLogger.Debug()(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> HERE");
+                target.StoreReference(gen);
+            }
+            else
+		    {
+                target.StoreReference(gen);
+            }
+            //Log.CurrentLogger.Debug()("--FINISH: StoreReference");
+        }
+    }
 }

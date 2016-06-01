@@ -139,7 +139,7 @@ namespace Castle.DynamicProxy.Generators.Emitters
 
 		public virtual void Generate()
 		{
-			if (ImplementedByRuntime)
+            if (ImplementedByRuntime)
 			{
 				return;
 			}

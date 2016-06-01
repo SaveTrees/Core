@@ -37,23 +37,38 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 
 		public override void Emit(IMemberEmitter member, ILGenerator gen)
 		{
-			if (reference != null)
+            //Log.CurrentLogger.Debug()("-START : Emit Return");
+            //Log.CurrentLogger.Debug()("-- {@Member}", member.Member);
+            //Log.CurrentLogger.Debug()("-- {@ReturnType}", member.ReturnType);
+
+            if (reference != null)
 			{
-				ArgumentsUtil.EmitLoadOwnerAndReference(reference, gen);
-			}
+                //Log.CurrentLogger.Debug()("--START : Emit 1");
+                ArgumentsUtil.EmitLoadOwnerAndReference(reference, gen);
+                //Log.CurrentLogger.Debug()("--FINISH: Emit 1");
+            }
 			else if (expression != null)
 			{
-				expression.Emit(member, gen);
-			}
+                //Log.CurrentLogger.Debug()("--START : Emit 2");
+                expression.Emit(member, gen);
+                //Log.CurrentLogger.Debug()("--FINISH: Emit 2");
+            }
 			else
 			{
-				if (member.ReturnType != typeof(void))
+                //Log.CurrentLogger.Debug()("--START : Emit 3");
+                if (member.ReturnType != typeof(void))
 				{
-					OpCodeUtil.EmitLoadOpCodeForDefaultValueOfType(gen, member.ReturnType);
-				}
-			}
+                    //Log.CurrentLogger.Debug()("--START : Emit 4");
+                    OpCodeUtil.EmitLoadOpCodeForDefaultValueOfType(gen, member.ReturnType);
+                    //Log.CurrentLogger.Debug()("--FINISH: Emit 4");
+                }
+                //Log.CurrentLogger.Debug()("--FINISH: Emit 3");
+            }
 
-			gen.Emit(OpCodes.Ret);
-		}
-	}
+            //Log.CurrentLogger.Debug()("--START : Emit 5");
+            gen.Emit(OpCodes.Ret);
+            //Log.CurrentLogger.Debug()("--FINISH: Emit 5");
+            //Log.CurrentLogger.Debug()("-FINISH: Emit");
+        }
+    }
 }

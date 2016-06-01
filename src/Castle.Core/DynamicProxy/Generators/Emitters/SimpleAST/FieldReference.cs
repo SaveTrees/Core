@@ -21,16 +21,28 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
     using System.Reflection.Emit;
     using SaveTrees.Logging;
 
+    //using SaveTrees.Logging;
+
     [DebuggerDisplay("{fieldbuilder.Name} ({fieldbuilder.FieldType})")]
 	public class FieldReference : Reference
 	{
-		private readonly FieldInfo field;
+        private static readonly object Lock = new Object();
+        private string previousName = "";
+
+        private readonly FieldInfo field;
 		private readonly FieldBuilder fieldbuilder;
 		private readonly bool isStatic;
 
 		public FieldReference(FieldInfo field)
 		{
-			this.field = field;
+		    lock (Lock)
+		    {
+                //Log.CurrentLogger.Debug()("-------------------------START:  field-------------------------------");
+		        //Log.CurrentLogger.Debug()("field: ({@field})", field);
+                //Log.CurrentLogger.Debug()("-------------------------FINISH: field-------------------------------");
+            }
+
+            this.field = field;
 			if ((field.Attributes & FieldAttributes.Static) != 0)
 			{
 				isStatic = true;
@@ -40,7 +52,14 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 
 		public FieldReference(FieldBuilder fieldbuilder)
 		{
-			this.fieldbuilder = fieldbuilder;
+            lock (Lock)
+            {
+                //Log.CurrentLogger.Debug()("-------------------------START:  fieldbuilder-----------------------------");
+                //Log.CurrentLogger.Debug()("field: ({@fieldbuilder})", fieldbuilder);
+                //Log.CurrentLogger.Debug()("-------------------------FINISH: fieldbuilder-----------------------------");
+            }
+
+            this.fieldbuilder = fieldbuilder;
 			field = fieldbuilder;
 			if ((fieldbuilder.Attributes & FieldAttributes.Static) != 0)
 			{
@@ -83,28 +102,34 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 			}
 		}
 
-		public override void StoreReference(ILGenerator gen)
-		{
-		    Log.CurrentLogger.Debug()("StoreReference ({@gen})", gen);
-            Log.CurrentLogger.Debug()("Reference ({@Reference})", Reference);
-            Log.CurrentLogger.Debug()("Reference ({Reference.Name})", Reference.Name);
+        public override void StoreReference(ILGenerator gen)
+        {
+            //Log.CurrentLogger.Debug()("-------------------------START:  StoreReference------------------------------");
+            //Log.CurrentLogger.Debug()("StoreReference ({@gen})", gen);
+            //Log.CurrentLogger.Debug()("Reference ({@Reference})", Reference);
+            //Log.CurrentLogger.Debug()("Name ({@Name})", Reference.Name);
 
-            try
-		    {
-		        if (isStatic)
-		        {
-		            gen.Emit(OpCodes.Stsfld, Reference);
-		        }
-		        else
-		        {
-		            gen.Emit(OpCodes.Stfld, Reference);
-		        }
-		    }
-		    catch (Exception exception)
-		    {
-		        Log.CurrentLogger.ErrorWithException()(exception, "FieldReference");
-                throw;
-		    }
-		}
-    }
+            //Log.CurrentLogger.Debug()("previousName ({@previousName})", previousName);
+            if (Reference.Name == "__target")
+            {
+              Log.CurrentLogger.Debug()(">>>>> This member is failing <<<<<");
+                Log.CurrentLogger.Debug()("field {@handle}", field.FieldHandle);
+                Log.CurrentLogger.Debug()("fieldbuilder {@handle}", Fieldbuilder.FieldHandle);
+            }
+            else
+            {
+                if (isStatic)
+                {
+                    gen.Emit(OpCodes.Stsfld, Reference);
+                }
+                else
+                {
+                    gen.Emit(OpCodes.Stfld, Reference);
+                }
+            }
+
+            //Log.CurrentLogger.Debug()("-------------------------FINISH: StoreReference------------------------------");
+            previousName = Reference.Name;
+        }
+	}
 }
