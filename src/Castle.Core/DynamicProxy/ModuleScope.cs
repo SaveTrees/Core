@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Castle.DynamicProxy.Generators.Emitters;
+using SaveTrees.Logging;
+
 namespace Castle.DynamicProxy
 {
 	using System;
@@ -568,8 +571,20 @@ namespace Castle.DynamicProxy
 
 		public TypeBuilder DefineType(bool inSignedModulePreferably, string name, TypeAttributes flags)
 		{
-			var module = ObtainDynamicModule(disableSignedModule == false && inSignedModulePreferably);
-			return module.DefineType(name, flags);
+		    bool isStrongNamed;
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                //Log.CurrentLogger.Debug()(">>>>> Forcing signed dynamic assembly.");
+		        isStrongNamed = Assembly.GetAssembly(GetType()).IsAssemblySigned();
+		    }
+		    else
+		    {
+                isStrongNamed = !disableSignedModule && inSignedModulePreferably;
+		    }
+
+		    var module = ObtainDynamicModule(isStrongNamed);
+
+		    return module.DefineType(name, flags);
 		}
 	}
 }

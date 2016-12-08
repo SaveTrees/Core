@@ -66,23 +66,29 @@ namespace Castle.DynamicProxy.Generators.Emitters
 
 		private static bool ContainsPublicKey(this Assembly assembly)
 		{
-			// Pulled from a comment on http://www.flawlesscode.com/post/2008/08/Mocking-and-IOC-in-Silverlight-2-Castle-Project-and-Moq-ports.aspx
-			return assembly.FullName != null && !assembly.FullName.Contains("PublicKeyToken=null");
+		    // Pulled from a comment on http://www.flawlesscode.com/post/2008/08/Mocking-and-IOC-in-Silverlight-2-Castle-Project-and-Moq-ports.aspx
+		    var containsPublicKey = assembly != null && !assembly.FullName.Contains("PublicKeyToken=null");
+
+		    return containsPublicKey;
 		}
 
-		public static bool IsAnyTypeFromUnsignedAssembly(IEnumerable<Type> types)
+	    public static bool IsAnyTypeFromUnsignedAssembly(IEnumerable<Type> types)
 		{
-			return types.Any(t => t.Assembly.IsAssemblySigned() == false);
+		    var isAnyTypeFromUnsignedAssembly = types.Any(t => t.Assembly.IsAssemblySigned() == false);
+
+            return isAnyTypeFromUnsignedAssembly;
 		}
 
-		public static bool IsAnyTypeFromUnsignedAssembly(Type baseType, IEnumerable<Type> interfaces)
+	    public static bool IsAnyTypeFromUnsignedAssembly(Type baseType, IEnumerable<Type> interfaces)
 		{
 			if (baseType != null && baseType.Assembly.IsAssemblySigned() == false)
 			{
 				return true;
 			}
 
-			return IsAnyTypeFromUnsignedAssembly(interfaces);
+	        var isAnyTypeFromUnsignedAssembly = IsAnyTypeFromUnsignedAssembly(interfaces);
+
+	        return isAnyTypeFromUnsignedAssembly;
 		}
 
 		public static bool CanStrongNameAssembly { get; set; }
